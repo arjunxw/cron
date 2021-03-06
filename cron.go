@@ -24,11 +24,16 @@ type Cron struct {
 	parser    Parser
 	nextID    EntryID
 	jobWaiter sync.WaitGroup
+	executor  JobExecutor
 }
 
 // Job is an interface for submitted cron jobs.
 type Job interface {
 	Run()
+}
+
+type JobExecutor interface {
+	exec(jobWaiter *sync.WaitGroup, job Job)
 }
 
 // Schedule describes a job's duty cycle.
@@ -118,6 +123,7 @@ func New(opts ...Option) *Cron {
 		logger:    DefaultLogger,
 		location:  time.Local,
 		parser:    standardParser,
+		executor:  defaultExecutor{},
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -301,11 +307,7 @@ func (c *Cron) run() {
 
 // startJob runs the given job in a new goroutine.
 func (c *Cron) startJob(j Job) {
-	c.jobWaiter.Add(1)
-	go func() {
-		defer c.jobWaiter.Done()
-		j.Run()
-	}()
+	c.executor.exec(&c.jobWaiter, j)
 }
 
 // now returns current time in c location

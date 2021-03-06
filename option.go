@@ -43,3 +43,10 @@ func WithLogger(logger Logger) Option {
 		c.logger = logger
 	}
 }
+
+// WithExecutor overrides the job executor of the cron instance.
+func WithExecutor(executor JobExecutor) Option {
+	return func(c *Cron) {
+		c.executor = executor
+	}
+}

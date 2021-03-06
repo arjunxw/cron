@@ -40,3 +40,11 @@ func TestWithVerboseLogger(t *testing.T) {
 		t.Error("expected to see some actions, got:", out)
 	}
 }
+
+func TestWithExecutor(t *testing.T) {
+	executor := defaultExecutor{}
+	c := New(WithExecutor(executor))
+	if c.executor.(defaultExecutor) != executor {
+		t.Error("expected provided executor")
+	}
+}
